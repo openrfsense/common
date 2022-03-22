@@ -17,6 +17,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"log"
 	"strings"
@@ -40,7 +41,7 @@ func formatEnv(s string) string {
 // everything with environment variables. The paths are loaded in order of appearance,
 // so later files override earlier ones.
 // TODO: document errors
-func LoadConfig(paths ...string) {
+func LoadConfig(paths ...string) error {
 	conf = koanf.New(".")
 
 	for _, p := range paths {
@@ -54,8 +55,12 @@ func LoadConfig(paths ...string) {
 		}
 	}
 
+	if len(conf.Keys()) == 0 {
+		return fmt.Errorf("no configuration file was loaded")
+	}
+
 	conf.Load(env.Provider("ORFS_", ".", formatEnv), nil)
-	conf.Int(".")
+	return nil
 }
 
 // Returns value associated with path and nil if no value is found at path or value
