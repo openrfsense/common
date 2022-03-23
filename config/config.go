@@ -16,9 +16,7 @@
 package config
 
 import (
-	"errors"
 	"fmt"
-	"io/fs"
 	"log"
 	"strings"
 
@@ -37,27 +35,16 @@ func formatEnv(s string) string {
 	return strings.Replace(rawPath, "_", ".", -1)
 }
 
-// Loads YAML configuration files sequentially from given paths and overrides
-// everything with environment variables. The paths are loaded in order of appearance,
-// so later files override earlier ones.
-// TODO: document errors
-func LoadConfig(paths ...string) error {
+// Loads a YAML configuration file from the given path and overrides
+// it with environment variables. If the file cannot be loaded or
+// parsed as YAML, an error is returned.
+func Load(path string) error {
 	conf = koanf.New(".")
 
-	for _, p := range paths {
-		if err := conf.Load(file.Provider(p), yaml.Parser()); err != nil {
-			if errors.Is(err, fs.ErrNotExist) {
-				log.Printf("configuration file %s not found, skipping", p)
-			} else {
-				log.Fatalf("error loading configuration file: %v (%T)", err, err)
-			}
-			// TODO: validate
-		}
+	if err := conf.Load(file.Provider(p), yaml.Parser()); err != nil {
+		return fmt.Errorf("error loading configuration file: %v (%T)", err, err)
 	}
-
-	if len(conf.Keys()) == 0 {
-		return fmt.Errorf("no configuration file was loaded")
-	}
+	// TODO: validate
 
 	conf.Load(env.Provider("ORFS_", ".", formatEnv), nil)
 	return nil
