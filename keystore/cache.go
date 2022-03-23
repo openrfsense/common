@@ -25,12 +25,12 @@ import (
 
 var ErrNoKeyFound = errors.New("no key found in keystore")
 
+var DefaultTTL = 0 * time.Second
+
 var (
+	cache        *ristretto.Cache
 	keyRetriever Retriever
-
-	cache *ristretto.Cache
-
-	DefaultTTL = 0 * time.Second
+	internalTtl  = DefaultTTL
 )
 
 // The key retriever function will be passed the requested channel name and access string.
@@ -51,7 +51,7 @@ func Init(retriever Retriever, ttl time.Duration) error {
 		return err
 	}
 
-	DefaultTTL = ttl
+	internalTtl = ttl
 	keyRetriever = retriever
 	return nil
 }
@@ -63,14 +63,17 @@ func hashKey(channel string, access string) string {
 
 // Arbitrarily set a key in the keystore.
 func Set(channel string, access string, newKey string) {
-	cache.SetWithTTL(hashKey(channel, access), newKey, 1, DefaultTTL)
+	cache.SetWithTTL(hashKey(channel, access), newKey, 1, internalTtl)
 	cache.Wait()
 }
 
 // Tries retrieving a key from the keystore. If a key for the specified channel and access mode is not found,
 // and the retriever also returns an empty string, the retriever error is wrapped in ErrNoKeyFound and returned.
 func Must(channel string, access string) (string, error) {
-	if key, found := cache.Get(hashKey(channel, access)); found {
+	keyHash := hashKey(channel, access)
+	// Check if key is in cache and not expired
+	if _, fresh := cache.GetTTL(keyHash); fresh {
+		key, _ := cache.Get(keyHash)
 		if keyStr, ok := key.(string); ok {
 			return keyStr, nil
 		}

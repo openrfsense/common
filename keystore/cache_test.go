@@ -1,6 +1,9 @@
 package keystore
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestMust(t *testing.T) {
 	err := Init(nil, DefaultTTL)
@@ -42,4 +45,20 @@ func TestMust(t *testing.T) {
 	})
 
 	cache.Clear()
+
+	t.Run("get key after timeout expired", func(t *testing.T) {
+		err = Init(nil, 100*time.Millisecond)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		Set("channel", "r", "key")
+		time.Sleep(200 * time.Millisecond)
+		key, err := Must("channel", "r")
+		if err == nil {
+			duration, fresh := cache.GetTTL(hashKey("channel", "r"))
+			t.Logf("expected error, found key '%s' with duration %v and fresh: %v", key, duration, fresh)
+			t.Fail()
+		}
+	})
 }
