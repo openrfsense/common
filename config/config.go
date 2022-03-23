@@ -68,6 +68,10 @@ func LoadConfig(paths ...string) error {
 func Get[T comparable](path string) T {
 	var void T
 
+	if conf == nil {
+		return void
+	}
+
 	value := conf.Get(path)
 	if value == nil {
 		return void
@@ -123,6 +127,10 @@ func GetOrDefault[T comparable](path string, fallback T) T {
 func Must[T comparable](path string) T {
 	var void T
 
+	if conf == nil {
+		log.Fatalf("configuration was not initialized")
+	}
+
 	value := conf.Get(path)
 	if value == nil {
 		log.Fatalf("no value found for path %s", path)
@@ -139,6 +147,10 @@ func Must[T comparable](path string) T {
 func MustMap[K comparable, V any](path string) map[K]V {
 	var void map[K]V
 	var voidValue V
+
+	if conf == nil {
+		log.Fatalf("configuration was not initialized")
+	}
 
 	obj := conf.Get(path)
 	if obj == nil {
