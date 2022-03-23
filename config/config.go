@@ -45,7 +45,7 @@ func Load(path string) error {
 		return fmt.Errorf("configuration file path cannot be empty")
 	}
 
-	if err := conf.Load(file.Provider(p), yaml.Parser()); err != nil {
+	if err := conf.Load(file.Provider(path), yaml.Parser()); err != nil {
 		return fmt.Errorf("error loading configuration file: %v (%T)", err, err)
 	}
 	// TODO: validate
