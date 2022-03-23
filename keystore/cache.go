@@ -18,6 +18,9 @@ package keystore
 import (
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/dgraph-io/ristretto"
 )
 
 var ErrNoKeyFound = errors.New("no key found in keystore")
@@ -25,7 +28,9 @@ var ErrNoKeyFound = errors.New("no key found in keystore")
 var (
 	keyRetriever Retriever
 
-	keyMap map[string]map[string]string
+	cache *ristretto.Cache
+
+	DefaultTTL = 0 * time.Second
 )
 
 // The key retriever function will be passed the requested channel name and access string.
@@ -35,26 +40,45 @@ var (
 type Retriever func(string, string) (string, error)
 
 // Initializes the internal keystore and sets a Retriever function.
-func Init(retriever Retriever) {
-	keyMap = make(map[string]map[string]string)
+func Init(retriever Retriever, ttl time.Duration) error {
+	var err error
+	cache, err = ristretto.NewCache(&ristretto.Config{
+		NumCounters: 10000,
+		MaxCost:     1000,
+		BufferItems: 64,
+	})
+	if err != nil {
+		return err
+	}
+
+	DefaultTTL = ttl
 	keyRetriever = retriever
+	return nil
+}
+
+// Should be safe enough to avoid collisions
+func hashKey(channel string, access string) string {
+	return fmt.Sprintf("%d%s%d%s", len(channel), channel, len(access), access)
 }
 
 // Arbitrarily set a key in the keystore.
 func Set(channel string, access string, newKey string) {
-	if _, ok := keyMap[channel]; !ok {
-		keyMap[channel] = make(map[string]string)
-	}
-	keyMap[channel][access] = newKey
+	cache.SetWithTTL(hashKey(channel, access), newKey, 1, DefaultTTL)
+	cache.Wait()
 }
 
 // Tries retrieving a key from the keystore. If a key for the specified channel and access mode is not found,
 // and the retriever also returns an empty string, the retriever error is wrapped in ErrNoKeyFound and returned.
 func Must(channel string, access string) (string, error) {
-	if accessMap, ok := keyMap[channel]; ok {
-		if key, keyOk := accessMap[access]; keyOk {
-			return key, nil
+	if key, found := cache.Get(hashKey(channel, access)); found {
+		if keyStr, ok := key.(string); ok {
+			return keyStr, nil
 		}
+		return "", fmt.Errorf("wrong type for key: expected string, found %T", key)
+	}
+
+	if keyRetriever == nil {
+		return "", fmt.Errorf("%w, key not in cache and no retriever function was set", ErrNoKeyFound)
 	}
 
 	key, err := keyRetriever(channel, access)
