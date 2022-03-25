@@ -113,8 +113,8 @@ func GetOrDefault[T comparable](path string, fallback T) T {
 	return v
 }
 
-// Returns value found at path or panics if the path does not exist or value cannot be
-// cast to type T.
+// Returns value found at path or calls log.Fatalf if the path does not exist or value
+// cannot be cast to type T.
 func Must[T comparable](path string) T {
 	var void T
 
@@ -135,6 +135,8 @@ func Must[T comparable](path string) T {
 	return void
 }
 
+// Returns map value associated with path and an calls log.Fatalf if no value is found
+// at path, value cannot be cast to map[K]V or any value in the map cannot be cast to type V.
 func MustMap[K comparable, V any](path string) map[K]V {
 	var void map[K]V
 	var voidValue V
