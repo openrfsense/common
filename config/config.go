@@ -30,7 +30,7 @@ import (
 
 var conf *koanf.Koanf
 
-// Formats enviroment variables: ORFS_SECTION_SUBSECTION_KEY becomes
+// Formats environment variables: ORFS_SECTION_SUBSECTION_KEY becomes
 // (as a path) section.subsection.key
 func formatEnv(s string) string {
 	rawPath := strings.ToLower(strings.TrimPrefix(s, "ORFS_"))
