@@ -12,9 +12,9 @@ type Flags int8
 
 var (
 	// More verbose logging flags for debugging/development.
-	FlagsDevelopment Flags = log.Ldate | log.Ltime | log.Lshortfile | log.Lmsgprefix
+	FlagsDevelopment Flags = log.LstdFlags | log.Lmicroseconds | log.Lmsgprefix
 	// Less verbose logging info.
-	FlagsProduction Flags = log.Ldate | log.Ltime | log.Lmsgprefix
+	FlagsProduction Flags = log.LstdFlags | log.Lmsgprefix
 )
 
 // Type Option is a function which takes a Logger instance and modifies some of its internal configuration.
@@ -46,7 +46,7 @@ func New(options ...Option) *Logger {
 func WithPrefix(prefix string) Option {
 	return func(l *Logger) {
 		l.name = prefix
-		l.logger.SetPrefix(fmt.Sprintf("[%s]", prefix))
+		l.logger.SetPrefix(fmt.Sprintf("[%s] ", prefix))
 	}
 }
 
