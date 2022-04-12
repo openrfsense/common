@@ -163,41 +163,41 @@ func GetOrDefault[T comparable](path string, fallback T) T {
 	return v
 }
 
-// Returns value found at path or calls log.Fatalf if the path does not exist or value
+// Returns value found at path or panics if the path does not exist or value
 // cannot be cast to type T.
 func Must[T comparable](path string) T {
 	var void T
 
 	if conf == nil {
-		log.Fatalf("configuration was not initialized")
+		panic("configuration was not initialized")
 	}
 
 	value := conf.Get(path)
 	if value == nil {
-		log.Fatalf("no value found for path %s", path)
+		panic(fmt.Sprintf("no value found for path %s", path))
 	}
 
 	if v, ok := value.(T); ok {
 		return T(v)
 	}
 
-	log.Fatalf("invalid value %#v (%T) for type %T", conf.Get(path), conf.Get(path), void)
+	panic(fmt.Sprintf("invalid value %#v (%T) for type %T", conf.Get(path), conf.Get(path), void))
 	return void
 }
 
-// Returns map value associated with path and an calls log.Fatalf if no value is found
+// Returns map value associated with path or panics if no value is found
 // at path, value cannot be cast to map[K]V or any value in the map cannot be cast to type V.
 func MustMap[K comparable, V any](path string) map[K]V {
 	var void map[K]V
 	var voidValue V
 
 	if conf == nil {
-		log.Fatalf("configuration was not initialized")
+		log.Fatal("configuration was not initialized")
 	}
 
 	obj := conf.Get(path)
 	if obj == nil {
-		log.Fatalf("no value found for path %s", path)
+		panic(fmt.Sprintf("no value found for path %s", path))
 	}
 
 	if m, ok := obj.(map[K]interface{}); ok {
@@ -206,15 +206,15 @@ func MustMap[K comparable, V any](path string) map[K]V {
 			if vCast, vOk := v.(V); vOk {
 				ret[k] = vCast
 			} else {
-				log.Fatalf(
+				panic(fmt.Sprintf(
 					"invalid value %#v (%T) for value type %T",
 					conf.Get(path), conf.Get(path), voidValue,
-				)
+				))
 			}
 		}
 		return ret
 	}
 
-	log.Fatalf("invalid value %#v (%T) for map type %T", conf.Get(path), conf.Get(path), void)
+	panic(fmt.Sprintf("invalid value %#v (%T) for map type %T", conf.Get(path), conf.Get(path), void))
 	return void
 }
