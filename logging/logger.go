@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-// Type Flags represents logger flags (see log.L* flags).
+// Type Flags represents logger flags (a wrapper around log.L* flags).
 type Flags int8
 
 var (
@@ -17,21 +17,25 @@ var (
 	FlagsProduction Flags = log.LstdFlags | log.Lmsgprefix
 )
 
-// Type Option is a function which takes a Logger instance and modifies some of its internal configuration.
+// Type Option is a function which takes a Logger instance and modifies some of its
+// internal configuration.
 type Option func(*Logger)
 
-// Type Logger represents a logger instance with a specific unit name (prefix) and logging level.
+// Type Logger represents a logger instance with a specific unit name (prefix) and
+// logging level. New instances are to be created with logging.New().
 type Logger struct {
 	logger *log.Logger
 	lvl    Level
 	name   string
 }
 
-// Creates a new Logger with the given options.
+// Creates a new Logger with the given options. The default logger has FlagsProduction,
+// logs at InfoLevel, has no prefix and outputs to os.Stderr.
 func New(options ...Option) *Logger {
 	ret := &Logger{
 		logger: log.New(os.Stderr, "", int(FlagsProduction)),
 		lvl:    InfoLevel,
+		name:   "",
 	}
 
 	for _, opt := range options {
