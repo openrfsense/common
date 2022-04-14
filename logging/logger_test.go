@@ -5,20 +5,9 @@ import (
 	"testing"
 )
 
-var testLogger = New(
-	WithOutput(io.Discard),
-	WithPrefix("benchmark"),
-)
-
-func TestNew(t *testing.T) {
-	l := New(
-		WithPrefix("test"),
-		WithFlags(FlagsDevelopment),
-		WithLevel(DebugLevel),
-	)
-
-	l.Debug("debug")
-}
+var testLogger = New().
+	WithOutput(io.Discard).
+	WithPrefix("benchmark")
 
 func BenchmarkLog(b *testing.B) {
 	for n := 0; n < b.N; n++ {

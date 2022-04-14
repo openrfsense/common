@@ -17,10 +17,6 @@ var (
 	FlagsProduction Flags = log.LstdFlags | log.Lmsgprefix
 )
 
-// Type Option is a function which takes a Logger instance and modifies some of its
-// internal configuration.
-type Option func(*Logger)
-
 // Type Logger represents a logger instance with a specific unit name (prefix) and
 // logging level. New instances are to be created with logging.New().
 type Logger struct {
@@ -31,48 +27,40 @@ type Logger struct {
 
 // Creates a new Logger with the given options. The default logger has FlagsProduction,
 // logs at InfoLevel, has no prefix and outputs to os.Stderr.
-func New(options ...Option) *Logger {
+func New() *Logger {
 	ret := &Logger{
 		logger: log.New(os.Stderr, "", int(FlagsProduction)),
 		lvl:    InfoLevel,
 		name:   "",
 	}
 
-	for _, opt := range options {
-		opt(ret)
-	}
-
 	return ret
+}
+
+// Changes the flags for the inderlying log.Logger. Default is FlagsProduction.
+func (l *Logger) WithFlags(flags Flags) *Logger {
+	l.logger.SetFlags(int(flags))
+	return l
+}
+
+// Sets a minimum logging level for the logger being created. Default is InfoLevel.
+func (l *Logger) WithLevel(lvl Level) *Logger {
+	l.lvl = lvl
+	return l
+}
+
+// Sets the output sink for the underlying log.Logger.
+func (l *Logger) WithOutput(w io.Writer) *Logger {
+	l.logger.SetOutput(w)
+	return l
 }
 
 // Gives a specific name to the logger. Will be included in the output as '[prefix]'.
 // Default is empty string (no prefix will be printed).
-func WithPrefix(prefix string) Option {
-	return func(l *Logger) {
-		l.name = prefix
-		l.logger.SetPrefix(fmt.Sprintf("[%s] ", prefix))
-	}
-}
-
-// Sets a minimum logging level for the logger being created. Default is InfoLevel.
-func WithLevel(lvl Level) Option {
-	return func(l *Logger) {
-		l.lvl = lvl
-	}
-}
-
-// Changes the flags for the inderlying log.Logger. Default is FlagsProduction.
-func WithFlags(flags Flags) Option {
-	return func(l *Logger) {
-		l.logger.SetFlags(int(flags))
-	}
-}
-
-// Sets the output sink for the underlying log.Logger.
-func WithOutput(w io.Writer) Option {
-	return func(l *Logger) {
-		l.logger.SetOutput(w)
-	}
+func (l *Logger) WithPrefix(prefix string) *Logger {
+	l.name = prefix
+	l.logger.SetPrefix(fmt.Sprintf("[%s] ", prefix))
+	return l
 }
 
 // Does the logging and panic/Exit.
