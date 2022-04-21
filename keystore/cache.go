@@ -86,7 +86,7 @@ func Must(channel string, access string) (string, error) {
 
 	key, err := keyRetriever(channel, access)
 	if err != nil {
-		return "", fmt.Errorf("%w, retriever returned error %v", ErrNoKeyFound, err)
+		return "", fmt.Errorf("%w, retriever returned error: %v", ErrNoKeyFound, err)
 	}
 
 	Set(channel, access, key)

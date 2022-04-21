@@ -66,6 +66,16 @@ func Load(path string, defaultConfig interface{}, outConfig ...interface{}) erro
 	return nil
 }
 
+// Exists returns true if all the given key paths exist in the conf map.
+func Exists(paths ...string) bool {
+	for _, path := range paths {
+		if !conf.Exists(path) {
+			return false
+		}
+	}
+	return true
+}
+
 // Returns value associated with path and nil if no value is found at path or value
 // cannot be cast to type T.
 func Get[T comparable](path string) T {
@@ -182,7 +192,6 @@ func Must[T comparable](path string) T {
 	}
 
 	panic(fmt.Sprintf("invalid value %#v (%T) for type %T", conf.Get(path), conf.Get(path), void))
-	return void
 }
 
 // Returns map value associated with path or panics if no value is found
@@ -216,5 +225,4 @@ func MustMap[K comparable, V any](path string) map[K]V {
 	}
 
 	panic(fmt.Sprintf("invalid value %#v (%T) for map type %T", conf.Get(path), conf.Get(path), void))
-	return void
 }

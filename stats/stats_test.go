@@ -13,35 +13,50 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package logging
+package stats
 
 import (
-	"io"
+	"encoding/json"
 	"testing"
+	"time"
 )
 
-var testLogger = New().
-	WithOutput(io.Discard).
-	WithPrefix("benchmark")
+type statsFs struct {
+	Device string
+}
 
-func BenchmarkLog(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		testLogger.Info(b.N)
+type fsProvider struct{}
+
+var _ Provider = fsProvider{}
+
+func (fp fsProvider) Stats() interface{} {
+	return []statsFs{
+		{Device: "device"},
 	}
 }
 
-func BenchmarkLog100(b *testing.B) {
-	for i := 0; i < 100; i++ {
-		for n := 0; n < b.N; n++ {
-			testLogger.Info(b.N)
-		}
-	}
+func (fp fsProvider) Name() string {
+	return "fs"
 }
 
-func BenchmarkLog1000(b *testing.B) {
-	for i := 0; i < 10000; i++ {
-		for n := 0; n < b.N; n++ {
-			testLogger.Info(b.N)
-		}
+func TestProviders(t *testing.T) {
+	s := Stats{
+		ID:       "id",
+		Hostname: "hostname",
+		Model:    "model",
+		Uptime:   time.Hour,
+	}
+
+	s.Provide(fsProvider{})
+
+	raw, err := json.Marshal(&s)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	out := Stats{}
+	err = json.Unmarshal(raw, &out)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
