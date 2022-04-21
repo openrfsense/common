@@ -16,6 +16,7 @@
 package stats
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -26,7 +27,7 @@ type Provider interface {
 	Name() string
 
 	// The actual stats collected by the provider.
-	Stats() interface{}
+	Stats() (interface{}, error)
 }
 
 // Type Stats contains in-depth information about a node's hardware and identity.
@@ -48,16 +49,27 @@ type Stats struct {
 }
 
 // Executes the given providers and stores the returned stats in Stats.Providers.
-func (s *Stats) Provide(providers ...Provider) {
+func (s *Stats) Provide(providers ...Provider) error {
 	if len(providers) == 0 {
-		return
+		return nil
 	}
 
 	if s.Providers == nil {
 		s.Providers = make(map[string]interface{})
 	}
 
+	var errBundle error
 	for _, p := range providers {
-		s.Providers[p.Name()] = p.Stats()
+		stats, err := p.Stats()
+		if err != nil {
+			if errBundle == nil {
+				errBundle = err
+			} else {
+				errBundle = fmt.Errorf("%s: %w", err.Error(), errBundle)
+			}
+		}
+		s.Providers[p.Name()] = stats
 	}
+
+	return errBundle
 }

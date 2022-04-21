@@ -17,6 +17,7 @@ package stats
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 )
@@ -27,36 +28,64 @@ type statsFs struct {
 
 type fsProvider struct{}
 
-var _ Provider = fsProvider{}
-
-func (fp fsProvider) Stats() interface{} {
+func (fp fsProvider) Stats() (interface{}, error) {
 	return []statsFs{
 		{Device: "device"},
-	}
+	}, nil
 }
 
 func (fp fsProvider) Name() string {
 	return "fs"
 }
 
+type errProvider struct{}
+
+func (ep errProvider) Stats() (interface{}, error) {
+	return nil, errors.New("error")
+}
+
+func (ep errProvider) Name() string {
+	return "err"
+}
+
 func TestProviders(t *testing.T) {
-	s := Stats{
-		ID:       "id",
-		Hostname: "hostname",
-		Model:    "model",
-		Uptime:   time.Hour,
-	}
+	t.Run("standard mock provider", func(t *testing.T) {
+		s := Stats{
+			ID:       "id",
+			Hostname: "hostname",
+			Model:    "model",
+			Uptime:   time.Hour,
+		}
 
-	s.Provide(fsProvider{})
+		err := s.Provide(fsProvider{})
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	raw, err := json.Marshal(&s)
-	if err != nil {
-		t.Fatal(err)
-	}
+		raw, err := json.Marshal(&s)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	out := Stats{}
-	err = json.Unmarshal(raw, &out)
-	if err != nil {
-		t.Fatal(err)
-	}
+		out := Stats{}
+		err = json.Unmarshal(raw, &out)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("error provider", func(t *testing.T) {
+		s := Stats{
+			ID:       "id",
+			Hostname: "hostname",
+			Model:    "model",
+			Uptime:   time.Hour,
+		}
+
+		err := s.Provide(errProvider{}, errProvider{})
+		if err == nil {
+			t.Log(err)
+			t.Fatal("err should not be nil")
+		}
+	})
 }
