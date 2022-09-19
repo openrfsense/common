@@ -43,7 +43,7 @@ func TestLoad(t *testing.T) {
 	}
 
 	conf = koanf.New(".")
-	conf.Load(structs.Provider(cfg, ""), nil)
+	_ = conf.Load(structs.Provider(cfg, ""), nil)
 
 	err := conf.Load(rawbytes.Provider(config), yaml.Parser())
 	if err != nil {

@@ -15,27 +15,22 @@
 
 package types
 
-// Type AggregatedMeasurementRequest describes a HTTP request for a measurement
-// campaign on a single sensor (the backend handles sending the same request
-// to all requested sensors).
-type AggregatedMeasurementRequest struct {
-	// Start time in milliseconds since epoch (Unix time)
-	Begin int64 `json:"begin"`
+import (
+	"time"
 
-	// End time in milliseconds since epoch (Unix time)
-	End int64 `json:"end"`
+	v "github.com/go-ozzo/ozzo-validation/v4"
+)
 
-	// Lower bound for frequency in Hz
-	FreqMin int64 `json:"freqMin"`
+var _ v.Validatable = &AggregatedMeasurementRequest{}
 
-	// Upper bound for frequency in Hz
-	FreqMax int64 `json:"freqMax"`
-
-	// Frequency resolution in Hz
-	FreqRes int64 `json:"freqRes"`
-
-	// Time resolution in seconds
-	TimeRes int64 `json:"timeRes"`
-
-	// AggregationFunc? (defaults to AVG/average)
+// Validates the measurement request
+func (amr AggregatedMeasurementRequest) Validate() error {
+	return v.ValidateStruct(&amr,
+		v.Field(&amr.Begin, v.Required, v.Min(0), v.Max(amr.End)),
+		v.Field(&amr.End, v.Required, v.Min(amr.Begin), v.Max(time.Now().UnixMilli())),
+		v.Field(&amr.FreqMin, v.Required, v.Min(0), v.Max(amr.FreqMax)),
+		v.Field(&amr.FreqMax, v.Required, v.Min(amr.FreqMin)),
+		v.Field(&amr.FreqRes, v.Required, v.Max(amr.FreqMax-amr.FreqMin)),
+		v.Field(&amr.TimeRes, v.Required, v.Min(0)),
+	)
 }

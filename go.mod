@@ -1,22 +1,19 @@
 module github.com/openrfsense/common
 
-go 1.18
+go 1.19
 
 require (
-	github.com/dgraph-io/ristretto v0.1.0
-	github.com/knadh/koanf v1.4.0
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
+	github.com/knadh/koanf v1.4.3
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/golang/glog v1.0.0 // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

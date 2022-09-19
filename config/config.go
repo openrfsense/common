@@ -49,7 +49,7 @@ func Load(path string, defaultConfig interface{}, outConfig ...interface{}) erro
 		return fmt.Errorf("configuration file path cannot be empty")
 	}
 
-	conf.Load(structs.Provider(defaultConfig, ""), nil)
+	_ = conf.Load(structs.Provider(defaultConfig, ""), nil)
 
 	if err := conf.Load(file.Provider(path), yaml.Parser()); err != nil {
 		return fmt.Errorf("error loading configuration file: %v (%T)", err, err)
@@ -62,7 +62,7 @@ func Load(path string, defaultConfig interface{}, outConfig ...interface{}) erro
 		}
 	}
 
-	conf.Load(env.Provider("ORFS_", ".", formatEnv), nil)
+	_ = conf.Load(env.Provider("ORFS_", ".", formatEnv), nil)
 	return nil
 }
 
