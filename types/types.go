@@ -16,9 +16,11 @@
 package types
 
 // Type AggregatedMeasurementRequest describes a HTTP request for a measurement
-// campaign on a single sensor (the backend handles sending the same request
-// to all requested sensors).
+// campaign on multiple sensors.
 type AggregatedMeasurementRequest struct {
+	// List of sensor hardware IDs to run the measurement campaign on
+	Sensors []string `json:"sensors"`
+
 	// Start time in milliseconds since epoch (Unix time)
 	Begin int64 `json:"begin"`
 
