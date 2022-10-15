@@ -97,6 +97,13 @@ func Get[T comparable](path string) T {
 	return void
 }
 
+// Unmarshal unmarshals a given key path into the given struct using the mapstructure lib.
+// If no path is specified, the whole map is unmarshalled. `koanf` is the struct field tag
+// used to match field names.
+func Unmarshal(path string, out interface{}) error {
+	return conf.Unmarshal(path, out)
+}
+
 // Returns integer value associated with path and nil if no value is found at path or value
 // cannot be cast to int. Will try converting a string found at path to integer.
 func GetWeakInt(path string) int {

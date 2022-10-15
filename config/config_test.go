@@ -29,7 +29,15 @@ backend:
   port: "8081"
   users:
     openrfsense: openrfsense
+  structured:
+    key1: "value1"
+    key2: 2
 `)
+
+type structured struct {
+	Key1 string `koanf:"key1"`
+	Key2 int    `koanf:"key2"`
+}
 
 func TestLoad(t *testing.T) {
 	cfg := struct {
@@ -72,6 +80,30 @@ func TestGetWeak(t *testing.T) {
 	portInt := GetWeakInt("backend.port")
 	if portInt != 8081 {
 		t.Logf("Got port %v (%T), expected 8081 (int)", portInt, portInt)
+		t.Fail()
+	}
+}
+
+func TestGet(t *testing.T) {
+	conf = koanf.New(".")
+	err := conf.Load(rawbytes.Provider(config), yaml.Parser())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := structured{
+		Key1: "value1",
+		Key2: 2,
+	}
+
+	struc := structured{}
+	err = Unmarshal("backend.structured", &struc)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if struc != expected {
+		t.Logf("Got struct %#v (%T), expected %#v (structured)", struc, struc, expected)
 		t.Fail()
 	}
 }
