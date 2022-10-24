@@ -7,7 +7,7 @@ import (
 
 // Generates an arbitrarily long random string using an byte array as the seed.
 // Only lowercase modern English alphabet are used.
-func GenerateFromString(seed []byte, length int) string {
+func Generate(seed []byte, length int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyz"
 	const (
 		letterIdxBits = 6                    // 6 bits to represent a letter index
