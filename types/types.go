@@ -39,5 +39,8 @@ type AggregatedMeasurementRequest struct {
 	// Time resolution in seconds
 	TimeRes int64 `json:"timeRes"`
 
+	// Campaign ID. For internal use only, will be ignored if not null
+	CampaignId string `json:"campaignId"`
+
 	// AggregationFunc? (defaults to AVG/average)
 }

@@ -84,7 +84,7 @@ func TestGetWeak(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 	conf = koanf.New(".")
 	err := conf.Load(rawbytes.Provider(config), yaml.Parser())
 	if err != nil {
