@@ -21,7 +21,10 @@ import (
 	v "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-var _ v.Validatable = &AggregatedMeasurementRequest{}
+var (
+	_ v.Validatable = &AggregatedMeasurementRequest{}
+	_ v.Validatable = &RawMeasurementRequest{}
+)
 
 // Validates the measurement request
 func (amr AggregatedMeasurementRequest) Validate() error {
@@ -32,5 +35,13 @@ func (amr AggregatedMeasurementRequest) Validate() error {
 		v.Field(&amr.FreqMax, v.Required, v.Min(amr.FreqMin)),
 		v.Field(&amr.FreqRes, v.Required, v.Max(amr.FreqMax-amr.FreqMin)),
 		v.Field(&amr.TimeRes, v.Required, v.Min(0)),
+	)
+}
+
+// Validates the measurement request
+func (rmr RawMeasurementRequest) Validate() error {
+	return v.ValidateStruct(&rmr,
+		v.Field(&rmr.Begin, v.Required, v.Min(0), v.Max(rmr.End)),
+		v.Field(&rmr.End, v.Required, v.Min(rmr.Begin), v.Max(time.Now().UnixMilli())),
 	)
 }
