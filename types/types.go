@@ -15,6 +15,8 @@
 
 package types
 
+import "time"
+
 // Type AggregatedMeasurementRequest describes a HTTP request for a measurement
 // campaign on multiple sensors, where the results are averaged over the specified
 // time resolution.
@@ -22,11 +24,11 @@ type AggregatedMeasurementRequest struct {
 	// List of sensor hardware IDs to run the measurement campaign on
 	Sensors []string `json:"sensors"`
 
-	// Start time in milliseconds since epoch (Unix time)
-	Begin int64 `json:"begin"`
+	// Start time in ISO 8601
+	Begin time.Time `json:"begin"`
 
-	// End time in milliseconds since epoch (Unix time)
-	End int64 `json:"end"`
+	// End time in ISO 8601
+	End time.Time `json:"end"`
 
 	// Lower bound for frequency in Hz
 	FreqMin int64 `json:"freqMin"`
@@ -53,11 +55,11 @@ type RawMeasurementRequest struct {
 	// List of sensor hardware IDs to run the measurement campaign on
 	Sensors []string `json:"sensors"`
 
-	// Start time in milliseconds since epoch (Unix time)
-	Begin int64 `json:"begin"`
+	// Start time in ISO 8601
+	Begin time.Time `json:"begin"`
 
-	// End time in milliseconds since epoch (Unix time)
-	End int64 `json:"end"`
+	// End time in ISO 8601
+	End time.Time `json:"end"`
 
 	// Campaign ID. For internal use only, will be ignored if not null
 	CampaignId string `json:"campaignId"`

@@ -24,8 +24,8 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	t.Run("valid measurement request", func(t *testing.T) {
 		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now.Add(-time.Minute).UnixMilli(),
-			End:     now.UnixMilli(),
+			Begin:   now.Add(-time.Minute),
+			End:     now,
 			FreqMin: 10e8,   // 100MHz
 			FreqMax: 16e8,   // 160Mhz
 			FreqRes: 100000, // 100kHz
@@ -41,8 +41,8 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	t.Run("begin > end", func(t *testing.T) {
 		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now.UnixMilli(),
-			End:     now.Add(-time.Minute).UnixMilli(),
+			Begin:   now,
+			End:     now.Add(-time.Minute),
 			FreqMin: 18e8,   // 180MHz
 			FreqMax: 16e8,   // 160Mhz
 			FreqRes: 100000, // 100kHz
@@ -58,8 +58,8 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	t.Run("freqMin > freqMax", func(t *testing.T) {
 		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now.Add(-time.Minute).UnixMilli(),
-			End:     now.UnixMilli(),
+			Begin:   now.Add(-time.Minute),
+			End:     now,
 			FreqMin: 18e8,   // 180MHz
 			FreqMax: 16e8,   // 160Mhz
 			FreqRes: 100000, // 100kHz
@@ -75,8 +75,8 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	t.Run("freqRes too high (freqMax - freqMin)", func(t *testing.T) {
 		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now.Add(-time.Minute).UnixMilli(),
-			End:     now.UnixMilli(),
+			Begin:   now.Add(-time.Minute),
+			End:     now,
 			FreqMin: 10e8, // 100MHz
 			FreqMax: 16e8, // 160Mhz
 			FreqRes: 10e8, // 100MHz > 60MHz
@@ -86,6 +86,34 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 		err := amr.Validate()
 		if err == nil {
 			t.Fatalf("freqRes (%d) must be higher than freqMax (%d) - freqMin (%d)", amr.FreqRes, amr.FreqMax, amr.FreqMin)
+		}
+	})
+}
+
+func TestValidateRawMeasurementRequest(t *testing.T) {
+	t.Run("valid measurement request", func(t *testing.T) {
+		now := time.Now()
+		rmr := RawMeasurementRequest{
+			Begin: now.Add(-time.Minute),
+			End:   now,
+		}
+
+		err := rmr.Validate()
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("begin > end", func(t *testing.T) {
+		now := time.Now()
+		rmr := RawMeasurementRequest{
+			Begin: now,
+			End:   now.Add(-time.Minute),
+		}
+
+		err := rmr.Validate()
+		if err == nil {
+			t.Fatalf("begin (%v) must be later than end (%v)", rmr.Begin, rmr.End)
 		}
 	})
 }
