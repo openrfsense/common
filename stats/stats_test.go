@@ -28,24 +28,34 @@ type statsFs struct {
 
 type fsProvider struct{}
 
-func (fp fsProvider) Stats() (interface{}, error) {
+func (fsProvider) Stats(_ interface{}) (interface{}, error) {
 	return []statsFs{
 		{Device: "device"},
 	}, nil
 }
 
-func (fp fsProvider) Name() string {
+func (fsProvider) Name() string {
 	return "fs"
 }
 
 type errProvider struct{}
 
-func (ep errProvider) Stats() (interface{}, error) {
+func (errProvider) Stats(_ interface{}) (interface{}, error) {
 	return nil, errors.New("error")
 }
 
-func (ep errProvider) Name() string {
+func (errProvider) Name() string {
 	return "err"
+}
+
+type staticDataProvider struct{}
+
+func (staticDataProvider) Stats(data interface{}) (interface{}, error) {
+	return data, nil
+}
+
+func (staticDataProvider) Name() string {
+	return "staticData"
 }
 
 func TestProviders(t *testing.T) {
@@ -86,6 +96,29 @@ func TestProviders(t *testing.T) {
 		if err == nil {
 			t.Log(err)
 			t.Fatal("err should not be nil")
+		}
+	})
+
+	t.Run("static data provider", func(t *testing.T) {
+		s := Stats{
+			ID:       "id",
+			Hostname: "hostname",
+			Model:    "model",
+			Uptime:   time.Hour,
+		}
+
+		exp := "data"
+
+		err := s.ProvideWithData(exp, staticDataProvider{})
+		if err != nil {
+			t.Log(err)
+			t.Fatal("err should be nil")
+		}
+
+		got := s.Providers["staticData"]
+		if got != exp {
+			t.Logf("expected staticData provider to be '%s', got '%s'", exp, got)
+			t.Fail()
 		}
 	})
 }

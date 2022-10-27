@@ -26,8 +26,9 @@ type Provider interface {
 	// Returns a unique name for the provider, so it can store stats at Stats.Providers[name]
 	Name() string
 
-	// The actual stats collected by the provider.
-	Stats() (interface{}, error)
+	// Returns an arbitrary object containing the statistics collected by the provider.
+	// Receives any static data passed with the ProvideStateful function.
+	Stats(data interface{}) (interface{}, error)
 }
 
 // Type Stats contains in-depth information about a node's hardware and identity.
@@ -48,8 +49,9 @@ type Stats struct {
 	Providers map[string]interface{} `json:"providers,omitempty"`
 }
 
-// Executes the given providers and stores the returned stats in Stats.Providers.
-func (s *Stats) Provide(providers ...Provider) error {
+// Executes the given providers, passing the given data through their Stats function
+// and stores the returned stats in Stats.Providers.
+func (s *Stats) ProvideWithData(data interface{}, providers ...Provider) error {
 	if len(providers) == 0 {
 		return nil
 	}
@@ -60,7 +62,7 @@ func (s *Stats) Provide(providers ...Provider) error {
 
 	var errBundle error
 	for _, p := range providers {
-		stats, err := p.Stats()
+		stats, err := p.Stats(data)
 		if err != nil {
 			if errBundle == nil {
 				errBundle = err
@@ -72,4 +74,9 @@ func (s *Stats) Provide(providers ...Provider) error {
 	}
 
 	return errBundle
+}
+
+// Executes the given providers and stores the returned stats in Stats.Providers.
+func (s *Stats) Provide(providers ...Provider) error {
+	return s.ProvideWithData(nil, providers...)
 }
