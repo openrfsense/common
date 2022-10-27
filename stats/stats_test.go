@@ -28,7 +28,7 @@ type statsFs struct {
 
 type fsProvider struct{}
 
-func (fsProvider) Stats(_ interface{}) (interface{}, error) {
+func (fsProvider) Stats() (interface{}, error) {
 	return []statsFs{
 		{Device: "device"},
 	}, nil
@@ -40,7 +40,7 @@ func (fsProvider) Name() string {
 
 type errProvider struct{}
 
-func (errProvider) Stats(_ interface{}) (interface{}, error) {
+func (errProvider) Stats() (interface{}, error) {
 	return nil, errors.New("error")
 }
 
@@ -48,10 +48,12 @@ func (errProvider) Name() string {
 	return "err"
 }
 
-type staticDataProvider struct{}
+type staticDataProvider struct {
+	Data string
+}
 
-func (staticDataProvider) Stats(data interface{}) (interface{}, error) {
-	return data, nil
+func (sp staticDataProvider) Stats() (interface{}, error) {
+	return sp.Data, nil
 }
 
 func (staticDataProvider) Name() string {
@@ -109,7 +111,9 @@ func TestProviders(t *testing.T) {
 
 		exp := "data"
 
-		err := s.ProvideWithData(exp, staticDataProvider{})
+		err := s.Provide(staticDataProvider{
+			Data: exp,
+		})
 		if err != nil {
 			t.Log(err)
 			t.Fatal("err should be nil")
