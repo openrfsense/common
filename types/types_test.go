@@ -94,8 +94,9 @@ func TestValidateRawMeasurementRequest(t *testing.T) {
 	t.Run("valid measurement request", func(t *testing.T) {
 		now := time.Now().Unix()
 		rmr := RawMeasurementRequest{
-			Begin: now - int64(time.Minute/time.Millisecond),
-			End:   now,
+			Begin:      now - int64(time.Minute/time.Millisecond),
+			End:        now,
+			FreqCenter: 10e8, // 100MHz
 		}
 
 		err := rmr.Validate()
@@ -107,8 +108,23 @@ func TestValidateRawMeasurementRequest(t *testing.T) {
 	t.Run("begin > end", func(t *testing.T) {
 		now := time.Now().Unix()
 		rmr := RawMeasurementRequest{
-			Begin: now,
-			End:   now - int64(time.Minute/time.Millisecond),
+			Begin:      now,
+			End:        now - int64(time.Minute/time.Millisecond),
+			FreqCenter: 10e8, // 100MHz
+		}
+
+		err := rmr.Validate()
+		if err == nil {
+			t.Fatalf("begin (%v) must be later than end (%v)", rmr.Begin, rmr.End)
+		}
+	})
+
+	t.Run("invalid freqCenter", func(t *testing.T) {
+		now := time.Now().Unix()
+		rmr := RawMeasurementRequest{
+			Begin:      now,
+			End:        now - int64(time.Minute/time.Millisecond),
+			FreqCenter: -1,
 		}
 
 		err := rmr.Validate()
