@@ -53,6 +53,9 @@ type RawMeasurementRequest struct {
 	// List of sensor hardware IDs to run the measurement campaign on
 	Sensors []string `json:"sensors"`
 
+	// Center frequency for measurement
+	FreqCenter int64
+
 	// Start time in Unix epoch (seconds elapsed since January 1, 1970 UTC)
 	Begin int64 `json:"begin"`
 
