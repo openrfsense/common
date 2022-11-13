@@ -64,8 +64,8 @@ func (amr AggregatedMeasurementRequest) Validate() error {
 // Validates the measurement request.
 func (rmr RawMeasurementRequest) Validate() error {
 	return v.ValidateStruct(&rmr,
-		v.Field(&rmr.Begin, v.Required, v.Min(0), v.Max(rmr.End)),
-		v.Field(&rmr.End, v.Required, v.Min(rmr.Begin)),
+		v.Field(&rmr.Begin, v.Required, v.By(isBefore(rmr.End))),
+		v.Field(&rmr.End, v.Required, v.By(isAfter(rmr.Begin))),
 		v.Field(&rmr.FreqCenter, v.Required, v.Min(0)),
 	)
 }
