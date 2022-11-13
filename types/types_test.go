@@ -22,9 +22,9 @@ import (
 
 func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	t.Run("valid measurement request", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now - int64(time.Minute/time.Millisecond),
+			Begin:   now.Add(-time.Minute),
 			End:     now,
 			FreqMin: 10e8,   // 100MHz
 			FreqMax: 16e8,   // 160Mhz
@@ -39,10 +39,10 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	})
 
 	t.Run("begin > end", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		amr := AggregatedMeasurementRequest{
 			Begin:   now,
-			End:     now - int64(time.Minute/time.Millisecond),
+			End:     now.Add(-time.Minute),
 			FreqMin: 18e8,   // 180MHz
 			FreqMax: 16e8,   // 160Mhz
 			FreqRes: 100000, // 100kHz
@@ -56,9 +56,9 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	})
 
 	t.Run("freqMin > freqMax", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now - int64(time.Minute/time.Millisecond),
+			Begin:   now.Add(-time.Minute),
 			End:     now,
 			FreqMin: 18e8,   // 180MHz
 			FreqMax: 16e8,   // 160Mhz
@@ -73,9 +73,9 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 	})
 
 	t.Run("freqRes too high (freqMax - freqMin)", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		amr := AggregatedMeasurementRequest{
-			Begin:   now - int64(time.Minute/time.Millisecond),
+			Begin:   now.Add(-time.Minute),
 			End:     now,
 			FreqMin: 10e8, // 100MHz
 			FreqMax: 16e8, // 160Mhz
@@ -92,11 +92,11 @@ func TestValidateAggregatedMeasurementRequest(t *testing.T) {
 
 func TestValidateRawMeasurementRequest(t *testing.T) {
 	t.Run("valid measurement request", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		rmr := RawMeasurementRequest{
-			Begin:      now - int64(time.Minute/time.Millisecond),
+			Begin:      now.Add(-time.Minute),
 			End:        now,
-			FreqCenter: 10e8, // 100MHz
+			FreqCenter: -1,
 		}
 
 		err := rmr.Validate()
@@ -106,11 +106,11 @@ func TestValidateRawMeasurementRequest(t *testing.T) {
 	})
 
 	t.Run("begin > end", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		rmr := RawMeasurementRequest{
 			Begin:      now,
-			End:        now - int64(time.Minute/time.Millisecond),
-			FreqCenter: 10e8, // 100MHz
+			End:        now.Add(-time.Minute),
+			FreqCenter: -1,
 		}
 
 		err := rmr.Validate()
@@ -120,10 +120,10 @@ func TestValidateRawMeasurementRequest(t *testing.T) {
 	})
 
 	t.Run("invalid freqCenter", func(t *testing.T) {
-		now := time.Now().Unix()
+		now := time.Now()
 		rmr := RawMeasurementRequest{
 			Begin:      now,
-			End:        now - int64(time.Minute/time.Millisecond),
+			End:        now.Add(-time.Minute),
 			FreqCenter: -1,
 		}
 

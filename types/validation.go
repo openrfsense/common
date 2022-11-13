@@ -16,6 +16,9 @@
 package types
 
 import (
+	"fmt"
+	"time"
+
 	v "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -24,11 +27,33 @@ var (
 	_ v.Validatable = &RawMeasurementRequest{}
 )
 
-// Validates the measurement request
+// Returns error if "begin" is after "after".
+func isBefore(end time.Time) v.RuleFunc {
+	return func(value interface{}) error {
+		begin, _ := value.(time.Time)
+		if begin.After(end) {
+			return fmt.Errorf("Begin must be before End")
+		}
+		return nil
+	}
+}
+
+// Returns error if "end" is before "begin".
+func isAfter(begin time.Time) v.RuleFunc {
+	return func(value interface{}) error {
+		end, _ := value.(time.Time)
+		if end.Before(begin) {
+			return fmt.Errorf("End must be after Begin")
+		}
+		return nil
+	}
+}
+
+// Validates the measurement request.
 func (amr AggregatedMeasurementRequest) Validate() error {
 	return v.ValidateStruct(&amr,
-		v.Field(&amr.Begin, v.Required, v.Min(0), v.Max(amr.End)),
-		v.Field(&amr.End, v.Required, v.Min(amr.Begin)),
+		v.Field(&amr.Begin, v.Required, v.By(isBefore(amr.End))),
+		v.Field(&amr.End, v.Required, v.By(isAfter(amr.Begin))),
 		v.Field(&amr.FreqMin, v.Required, v.Min(0), v.Max(amr.FreqMax)),
 		v.Field(&amr.FreqMax, v.Required, v.Min(amr.FreqMin)),
 		v.Field(&amr.FreqRes, v.Required, v.Max(amr.FreqMax-amr.FreqMin)),
@@ -36,7 +61,7 @@ func (amr AggregatedMeasurementRequest) Validate() error {
 	)
 }
 
-// Validates the measurement request
+// Validates the measurement request.
 func (rmr RawMeasurementRequest) Validate() error {
 	return v.ValidateStruct(&rmr,
 		v.Field(&rmr.Begin, v.Required, v.Min(0), v.Max(rmr.End)),
